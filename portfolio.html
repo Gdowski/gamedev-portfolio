@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jarosław Gdowski — Gameplay Programmer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0c0c0e;
+  --bg2: #111114;
+  --bg3: #16161a;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #e8e8e4;
+  --muted: #888884;
+  --accent: #c8f060;
+  --accent2: #7dd4e8;
+  --accent3: #f5e060;
+  --mono: 'JetBrains Mono', monospace;
+  --display: 'Syne', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--display);
+  font-size: 16px;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── NAV ─── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  padding: 0 2.5rem;
+  height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(12,12,14,0.92);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-name { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); cursor: pointer; }
+.nav-links { display: flex; gap: 2rem; }
+.nav-links a { font-size: 12px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+
+/* ─── VIEWS ─── */
+#main-view { display: block; }
+#project-view { display: none; }
+
+/* ─── HERO ─── */
+#hero { padding: 9rem 2.5rem 6rem; max-width: 900px; margin: 0 auto; }
+.hero-eyebrow { font-family: var(--mono); font-size: 12px; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; }
+.hero-eyebrow::before { content: ''; display: inline-block; width: 32px; height: 1px; background: var(--accent); }
+h1 { font-size: clamp(2.8rem, 7vw, 5.2rem); font-weight: 800; line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 1.5rem; }
+h1 span { color: var(--accent); }
+.hero-sub { font-family: var(--mono); font-size: 14px; color: var(--muted); line-height: 1.9; max-width: 540px; margin-bottom: 2.5rem; }
+.hero-cta { display: flex; gap: 1rem; flex-wrap: wrap; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 24px; font-family: var(--display); font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none; border: 1px solid; border-radius: 2px; transition: all 0.2s; cursor: pointer; background: none; }
+.btn-primary { background: var(--accent); color: #0c0c0e; border-color: var(--accent); }
+.btn-primary:hover { background: #d4f57a; }
+.btn-ghost { color: var(--text); border-color: var(--border2); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ─── SECTIONS ─── */
+.section { padding: 5rem 2.5rem; max-width: 900px; margin: 0 auto; }
+.section + .section, .section-bordered { border-top: 1px solid var(--border); }
+.sec-label { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 0.4rem; }
+h2 { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 3rem; line-height: 1.15; }
+
+/* ─── ABOUT ─── */
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+.about-text { color: var(--muted); line-height: 1.85; font-size: 15px; }
+.about-text strong { color: var(--text); font-weight: 500; }
+.skill-group { margin-bottom: 1.5rem; }
+.skill-group-title { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.5rem; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { font-family: var(--mono); font-size: 11px; padding: 3px 10px; background: rgba(200,240,96,0.07); color: var(--accent); border: 1px solid rgba(200,240,96,0.15); border-radius: 2px; }
+.tag.blue { background: rgba(125,212,232,0.07); color: var(--accent2); border-color: rgba(125,212,232,0.15); }
+.tag.neutral { background: rgba(255,255,255,0.04); color: var(--muted); border-color: var(--border); }
+
+/* ─── PROJECT CARDS ─── */
+.project-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 4px;
+  margin-bottom: 1.5rem; cursor: pointer;
+  transition: border-color 0.2s, transform 0.2s;
+  position: relative; overflow: hidden;
+}
+.project-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--accent); opacity: 0; transition: opacity 0.2s; }
+.project-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.project-card:hover::before { opacity: 1; }
+.project-card.secondary::before { background: var(--accent2); }
+
+.card-body { padding: 2rem; }
+.project-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
+.project-engine { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
+.project-card.secondary .project-engine { color: var(--accent2); }
+.project-title { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; }
+.status-badge { font-family: var(--mono); font-size: 10px; padding: 3px 10px; border-radius: 2px; white-space: nowrap; flex-shrink: 0; background: rgba(200,240,96,0.08); color: var(--accent); border: 1px solid rgba(200,240,96,0.2); }
+.project-desc { color: var(--muted); font-size: 14px; line-height: 1.75; margin-bottom: 1.5rem; }
+
+.systems-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.5rem; }
+.system-item { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; }
+.system-bullet { width: 4px; height: 4px; background: var(--accent); border-radius: 50%; flex-shrink: 0; margin-top: 7px; }
+.project-card.secondary .system-bullet { background: var(--accent2); }
+.project-card.secondary .status-badge { background: rgba(125,212,232,0.08); color: var(--accent2); border-color: rgba(125,212,232,0.2); }
+.system-name { color: var(--text); font-weight: 500; }
+.system-detail { color: var(--muted); font-size: 12px; margin-top: 1px; }
+
+.card-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1.25rem 2rem; border-top: 1px solid var(--border); }
+.card-footer-hint { font-family: var(--mono); font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.card-footer-hint::after { content: '→'; color: var(--accent); transition: transform 0.2s; }
+.project-card:hover .card-footer-hint::after { transform: translateX(4px); }
+
+/* ─── PROJECT DETAIL VIEW ─── */
+#project-view {
+  padding-top: 56px;
+  min-height: 100vh;
+}
+
+.pv-back {
+  display: flex; align-items: center; gap: 8px;
+  padding: 1.5rem 2.5rem;
+  max-width: 900px; margin: 0 auto;
+  font-family: var(--mono); font-size: 12px;
+  color: var(--muted); cursor: pointer;
+  transition: color 0.2s; width: fit-content;
+  border: none; background: none;
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.pv-back:hover { color: var(--accent); }
+.pv-back::before { content: '←'; }
+
+.pv-hero {
+  padding: 1rem 2.5rem 3rem;
+  max-width: 900px; margin: 0 auto;
+  border-bottom: 1px solid var(--border);
+}
+.pv-engine { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.5rem; }
+.pv-title { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 1rem; }
+.pv-tagline { font-family: var(--mono); font-size: 14px; color: var(--muted); line-height: 1.8; max-width: 600px; margin-bottom: 2rem; }
+.pv-meta { display: flex; gap: 2rem; flex-wrap: wrap; }
+.pv-meta-item { }
+.pv-meta-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 2px; }
+.pv-meta-value { font-size: 13px; font-weight: 500; }
+
+.pv-body { max-width: 900px; margin: 0 auto; padding: 0 2.5rem; }
+
+/* Media gallery */
+.media-section { padding: 3rem 0; border-bottom: 1px solid var(--border); }
+.media-section-title { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 1.25rem; }
+.media-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.media-placeholder {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 4px; aspect-ratio: 16/9;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; cursor: pointer; transition: border-color 0.2s;
+  position: relative; overflow: hidden;
+}
+.media-placeholder:hover { border-color: var(--border2); }
+.media-placeholder.full-width { grid-column: 1 / -1; aspect-ratio: 16/7; }
+.media-icon { font-size: 28px; opacity: 0.3; }
+.media-label { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; text-align: center; }
+.media-sublabel { font-size: 11px; color: rgba(136,136,132,0.5); text-align: center; }
+.media-upload-hint {
+  position: absolute; bottom: 10px; right: 10px;
+  font-family: var(--mono); font-size: 10px; color: var(--accent);
+  background: rgba(200,240,96,0.08); border: 1px solid rgba(200,240,96,0.15);
+  padding: 2px 8px; border-radius: 2px; opacity: 0; transition: opacity 0.2s;
+}
+.media-placeholder:hover .media-upload-hint { opacity: 1; }
+
+/* static media items (no upload) */
+.media-item {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 4px; aspect-ratio: 16/9;
+  position: relative; overflow: hidden;
+}
+.media-item.full-width { grid-column: 1 / -1; aspect-ratio: 16/7; }
+.media-item img, .media-item video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover; border-radius: 4px;
+}
+.media-caption {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 8px 12px;
+  font-family: var(--mono); font-size: 10px; color: rgba(232,232,228,0.6);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  background: linear-gradient(to top, rgba(12,12,14,0.75) 0%, transparent 100%);
+}
+.media-thumb { cursor: pointer; }
+.media-thumb:hover { border-color: var(--border2); }
+.media-thumb:hover img { opacity: 0.75; transition: opacity 0.15s; }
+.media-item.full-width img { transition: opacity 0.12s; }
+
+/* actual media when added (upload path) */
+.media-placeholder img,
+.media-placeholder video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover;
+  border-radius: 4px;
+}
+
+/* Systems breakdown */
+.systems-section { padding: 3rem 0; border-bottom: 1px solid var(--border); }
+.systems-section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 2rem; }
+.system-block {
+  margin-bottom: 2rem; padding: 1.5rem;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.system-block-header { display: flex; align-items: center; gap: 10px; margin-bottom: 0.75rem; }
+.system-block-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; flex-shrink: 0; }
+.pv-secondary .system-block-dot { background: var(--accent2); }
+.system-block-name { font-size: 1rem; font-weight: 700; }
+.system-block-desc { font-size: 13px; color: var(--muted); line-height: 1.75; margin-bottom: 1rem; }
+.system-block-details { }
+.detail-row { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: var(--muted); padding: 3px 0; }
+.detail-row::before { content: '→'; color: var(--accent); flex-shrink: 0; font-family: var(--mono); font-size: 11px; margin-top: 1px; }
+.pv-secondary .detail-row::before { color: var(--accent2); }
+
+/* Code snippet */
+.code-section { padding: 3rem 0; border-bottom: 1px solid var(--border); }
+.code-block {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 4px; overflow: hidden; margin-bottom: 1rem;
+}
+.code-header { padding: 10px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.code-filename { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.code-lang { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; }
+.code-body { padding: 1.25rem 1.5rem; overflow-x: auto; }
+.code-body pre { font-family: var(--mono); font-size: 12px; line-height: 1.7; color: var(--text); white-space: pre; }
+.code-note { font-family: var(--mono); font-size: 12px; color: var(--muted); line-height: 1.7; }
+.tok-kw { color: #7dd4e8; }
+.tok-fn { color: #c8f060; }
+.tok-str { color: #f4a261; }
+.tok-comment { color: #444; font-style: italic; }
+.tok-type { color: #e8c468; }
+
+/* Blueprint screenshot slot (inline under system blocks) */
+.bp-shot {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 4px; overflow: hidden; margin-top: 1rem;
+}
+.bp-shot-header {
+  padding: 8px 14px; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.bp-shot-label { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.bp-shot-tag { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; }
+.bp-shot-body {
+  aspect-ratio: 21/9; position: relative; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px; transition: background 0.2s;
+}
+.bp-shot-body:hover { background: rgba(255,255,255,0.02); }
+.bp-shot-body img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
+.bp-shot-body img.loaded { display: block; }
+.bp-shot-icon { font-size: 20px; opacity: 0.2; }
+.bp-shot-hint { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.08em; }
+.bp-shot-upload-hint {
+  position: absolute; bottom: 8px; right: 10px;
+  font-family: var(--mono); font-size: 10px; color: var(--accent);
+  background: rgba(200,240,96,0.08); border: 1px solid rgba(200,240,96,0.15);
+  padding: 2px 8px; border-radius: 2px; opacity: 0; transition: opacity 0.2s;
+}
+.bp-shot-body:hover .bp-shot-upload-hint { opacity: 1; }
+.bp-shot-body.has-image { cursor: zoom-in; }
+
+/* Lightbox */
+#lightbox {
+  display: none; position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.92); cursor: zoom-out;
+  align-items: center; justify-content: center;
+}
+#lightbox.open { display: flex; }
+#lightbox img {
+  max-width: 92vw; max-height: 92vh;
+  object-fit: contain; border-radius: 4px;
+  box-shadow: 0 0 80px rgba(0,0,0,0.6);
+}
+
+/* Placeholder code hint */
+.code-placeholder {
+  padding: 2rem 1.5rem; display: flex; flex-direction: column; align-items: center;
+  gap: 8px; border: 1px dashed var(--border2); border-radius: 4px;
+  font-family: var(--mono); font-size: 12px; color: var(--muted); text-align: center;
+  margin-bottom: 1rem;
+}
+.code-placeholder span { color: var(--accent); }
+
+/* Takeaways */
+.takeaways-section { padding: 3rem 0; }
+.takeaways-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.takeaway-card { padding: 1.25rem; background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; }
+.takeaway-num { font-family: var(--mono); font-size: 11px; color: var(--accent); margin-bottom: 6px; }
+.pv-secondary .takeaway-num { color: var(--accent2); }
+
+/* ── accent3 — Unity yellow ── */
+.project-card.tertiary::before { background: var(--accent3); }
+.project-card.tertiary .project-engine { color: var(--accent3); }
+.project-card.tertiary .system-bullet { background: var(--accent3); }
+.project-card.tertiary .status-badge { background: rgba(245,224,96,0.08); color: var(--accent3); border-color: rgba(245,224,96,0.2); }
+.tag.yellow { background: rgba(245,224,96,0.07); color: var(--accent3); border-color: rgba(245,224,96,0.15); }
+.pv-tertiary .system-block-dot { background: var(--accent3); }
+.pv-tertiary .detail-row::before { color: var(--accent3); }
+.pv-tertiary .takeaway-num { color: var(--accent3); }
+.pv-tertiary .media-section-title { color: var(--accent3); }
+.pv-tertiary .code-lang { color: var(--accent3); }
+
+.takeaway-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+.takeaway-text strong { color: var(--text); font-weight: 500; }
+
+/* ─── EXPERIENCE ─── */
+.exp-item { margin-bottom: 2.5rem; }
+.exp-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.5rem; }
+.exp-role { font-size: 1rem; font-weight: 700; }
+.exp-company { font-size: 13px; color: var(--accent); margin-bottom: 2px; }
+.exp-date { font-family: var(--mono); font-size: 11px; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
+.exp-list { list-style: none; padding: 0; }
+.exp-list li { font-size: 13px; color: var(--muted); padding: 3px 0 3px 16px; position: relative; line-height: 1.65; }
+.exp-list li::before { content: '→'; position: absolute; left: 0; color: var(--accent); font-size: 11px; }
+.exp-divider { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+
+/* ─── CONTACT ─── */
+.contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.contact-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 1.25rem 1.5rem; text-decoration: none; display: flex; align-items: center; gap: 12px; transition: border-color 0.2s; }
+.contact-card:hover { border-color: var(--accent); }
+.contact-icon { width: 36px; height: 36px; background: rgba(200,240,96,0.07); border: 1px solid rgba(200,240,96,0.15); border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; color: var(--accent); font-family: var(--mono); }
+.contact-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; font-family: var(--mono); }
+.contact-value { font-size: 13px; color: var(--text); font-weight: 500; }
+
+footer { max-width: 900px; margin: 0 auto; padding: 2rem 2.5rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+footer p { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.08em; }
+
+.fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 640px) {
+  nav { padding: 0 1rem; }
+  .nav-links { gap: 1rem; }
+  .section, .pv-hero, .pv-body, .pv-back { padding-left: 1rem; padding-right: 1rem; }
+  #hero { padding-left: 1rem; padding-right: 1rem; }
+  .about-grid, .contact-grid { grid-template-columns: 1fr; }
+  .project-header { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-name" onclick="showMain()">JG</span>
+  <div class="nav-links" id="nav-main">
+    <a href="#about">About</a>
+    <a href="#projects">Projects</a>
+    <a href="#experience">Experience</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     MAIN VIEW
+═══════════════════════════════════════════ -->
+<div id="main-view">
+
+  <section id="hero">
+    <div class="hero-eyebrow">Gameplay Programmer</div>
+    <h1>Jarosław<br><span>Gdowski</span></h1>
+    <p class="hero-sub">
+      Building gameplay systems in Unreal & Unity.<br>
+      7 years shipping performance-critical production software in Rust.<br>
+      Based in Gdańsk, Poland.
+    </p>
+    <div class="hero-cta">
+      <a href="#projects" class="btn btn-primary">View Projects</a>
+      <a href="#contact" class="btn btn-ghost">Get in Touch</a>
+    </div>
+  </section>
+
+  <div class="section fade-in" id="about">
+    <p class="sec-label">// 01 — About</p>
+    <h2>Performance first.<br>Always.</h2>
+    <div class="about-grid">
+      <div>
+        <p class="about-text">Software engineer who spent 7 years building <strong>real-time, performance-critical systems</strong> in production — async state machines, device communication, low-level optimization.<br><br>
+        That foundation maps directly onto gameplay: event-driven logic, state-driven behaviour, and a hard-won instinct for where performance actually matters.<br><br>
+        Now applying it full-time to Unreal and Unity. I don't just read documentation — I build systems and push them until they break.</p>
+      </div>
+      <div>
+        <div class="skill-group">
+          <div class="skill-group-title">Unreal Engine (Blueprints)</div>
+          <div class="tags">
+            <span class="tag">GASP 5.7</span><span class="tag">Mover</span><span class="tag">Custom movement modes</span><span class="tag">Climbing system</span><span class="tag">Interaction system</span><span class="tag">NPC scheduling</span><span class="tag">Dialogue systems</span><span class="tag">Perforce</span>
+          </div>
+        </div>
+        <div class="skill-group">
+          <div class="skill-group-title">Unity (C#)</div>
+          <div class="tags">
+            <span class="tag yellow">Raycast physics</span><span class="tag yellow">Custom shaders</span><span class="tag yellow">Ink narrative</span><span class="tag yellow">Dialogue systems</span><span class="tag yellow">Event-driven</span>
+          </div>
+        </div>
+        <div class="skill-group">
+          <div class="skill-group-title">Production background</div>
+          <div class="tags">
+            <span class="tag neutral">Rust</span><span class="tag neutral">Async / multithreaded</span><span class="tag neutral">Real-time systems</span><span class="tag neutral">Low-level optimization</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section fade-in" id="projects">
+    <p class="sec-label">// 02 — Game Projects</p>
+    <h2>What I've built.</h2>
+
+    <!-- PROJECT 1: Narrative -->
+    <div class="project-card" onclick="showProject('narrative')">
+      <div class="card-body">
+        <div class="project-header">
+          <div>
+            <div class="project-engine">Unreal Engine 5 — Blueprints</div>
+            <div class="project-title">Thaelia</div>
+          </div>
+          <span class="status-badge">In Development</span>
+        </div>
+        <p class="project-desc">Third-person narrative exploration on a remote island with 10 distinct NPCs. Built entirely in Blueprints on top of GASP 5.7 — extended Mover with a custom climbing mode, built an interaction and inventory system, and wired a day/night cycle to NPC scheduling and dialogue.</p>
+        <div class="systems-list">
+          <div class="system-item"><div class="system-bullet"></div><div><div class="system-name">Custom Climbing Mode</div><div class="system-detail">New movement mode layered on GASP 5.7 / Mover — ledge detection, state transitions, animation blending.</div></div></div>
+          <div class="system-item"><div class="system-bullet"></div><div><div class="system-name">Interaction & Inventory</div><div class="system-detail">Interface-driven interaction with persistent inventory — tracks what each actor picked up.</div></div></div>
+          <div class="system-item"><div class="system-bullet"></div><div><div class="system-name">Day/Night + NPC Scheduling</div><div class="system-detail">Hourly events fire from the time manager — NPCs react by moving to locations or changing tasks.</div></div></div>
+          <div class="system-item"><div class="system-bullet"></div><div><div class="system-name">Dialogue System</div><div class="system-detail">Base component owns all building blocks — each NPC child overrides one function to assemble its own conversation.</div></div></div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="tags"><span class="tag">Unreal 5.7</span><span class="tag">Blueprints</span><span class="tag">GASP / Mover</span><span class="tag">AI Scheduling</span><span class="tag">Perforce</span></div>
+        <div class="card-footer-hint">View full breakdown</div>
+      </div>
+    </div>
+
+    <!-- PROJECT 2: Sound Horror -->
+    <div class="project-card secondary" onclick="showProject('horror')">
+      <div class="card-body">
+        <div class="project-header">
+          <div>
+            <div class="project-engine">Unreal Engine 5 — Blueprints</div>
+            <div class="project-title">Echo</div>
+          </div>
+          <span class="status-badge">Prototype</span>
+        </div>
+        <p class="project-desc">A slow-burn horror survival built on a single constraint: <em>you only perceive the world through sound.</em> Every noise renders as a visible ripple in world space. Silence is blindness.</p>
+        <div class="systems-list">
+          <div class="system-item"><div class="system-bullet"></div><div><div class="system-name">Sound Visualisation System</div><div class="system-detail">Audio events mapped to world-space visual rings with amplitude-driven decay and scale.</div></div></div>
+          <div class="system-item"><div class="system-bullet"></div><div><div class="system-name">Playability Prototype</div><div class="system-detail">Core loop designed to answer: is a game without traditional visuals actually playable?</div></div></div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="tags"><span class="tag blue">Unreal 5.7</span><span class="tag blue">Blueprints</span><span class="tag blue">Audio systems</span><span class="tag blue">Niagara</span></div>
+        <div class="card-footer-hint">View full breakdown</div>
+      </div>
+    </div>
+
+    <!-- PROJECT 3: Unity -->
+    <div class="project-card tertiary" onclick="showProject('unity')">
+      <div class="card-body">
+        <div class="project-header">
+          <div>
+            <div class="project-engine">Unity — C#</div>
+            <div class="project-title">Intrepid Traveller</div>
+          </div>
+          <span class="status-badge">Prototype</span>
+        </div>
+        <p class="project-desc">Story-driven racing game with horror elements. Atmosphere-first, minimal UI — narrative woven directly into gameplay. Currently polishing a vertical slice.</p>
+        <div class="systems-list">
+          <div class="system-item"><div class="system-bullet"></div><div><div class="system-name">Raycast Car Controller</div><div class="system-detail">Built from scratch — traction circle, weight transfer, gear system.</div></div></div>
+          <div class="system-item"><div class="system-bullet"></div><div><div class="system-name">Stencil Buffer Shader</div><div class="system-detail">Objects visible only inside car headlight cones.</div></div></div>
+          <div class="system-item"><div class="system-bullet"></div><div><div class="system-name">Ink Dialogue System</div><div class="system-detail">Narrative integrated via Ink scripting language.</div></div></div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="tags"><span class="tag yellow">Unity</span><span class="tag yellow">C#</span><span class="tag yellow">Shaders</span><span class="tag yellow">Ink</span><span class="tag yellow">Raycasts</span></div>
+        <div class="card-footer-hint">View full breakdown</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section fade-in" id="experience">
+    <p class="sec-label">// 03 — Experience</p>
+    <h2>Production background.</h2>
+    <div class="exp-item">
+      <div class="exp-header">
+        <div><div class="exp-company">DP IoT</div><div class="exp-role">Lead Software Engineer — Rust / Backend</div></div>
+        <div class="exp-date">Jul 2021 – Present</div>
+      </div>
+      <ul class="exp-list">
+        <li>Designed real-time systems handling async data streams — same architecture as gameplay event buses and input pipelines</li>
+        <li>Built and maintained state-driven logic for complex device behaviour and system coordination</li>
+        <li>Performance-focused development on long-running runtime systems — similar constraints to game loops</li>
+        <li>Hands-on technical leadership alongside direct code contribution</li>
+      </ul>
+    </div>
+    <hr class="exp-divider">
+    <div class="exp-item">
+      <div class="exp-header">
+        <div><div class="exp-company">DP IoT</div><div class="exp-role">Full Stack Engineer</div></div>
+        <div class="exp-date">Jul 2019 – Jul 2021</div>
+      </div>
+      <ul class="exp-list">
+        <li>Implemented event-driven systems and message queues for real-time data</li>
+        <li>Designed modular systems for remote control and parameter updates</li>
+        <li>Debugged complex edge cases in distributed runtime environments</li>
+      </ul>
+    </div>
+    <hr class="exp-divider">
+    <div class="exp-item">
+      <div class="exp-header">
+        <div><div class="exp-company">DP IoT</div><div class="exp-role">Firmware Developer</div></div>
+        <div class="exp-date">Jul 2018 – Jul 2019</div>
+      </div>
+      <ul class="exp-list">
+        <li>Firmware for BLE / NB-IoT devices — worked directly at memory and timing constraints</li>
+        <li>Low-level code optimization for power and performance</li>
+      </ul>
+    </div>
+    <hr class="exp-divider">
+    <div class="exp-item">
+      <div class="exp-header">
+        <div><div class="exp-company">Gdańsk University of Technology</div><div class="exp-role">MSc, Biomedical Engineering</div></div>
+        <div class="exp-date">2018 – 2020</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section fade-in" id="contact">
+    <p class="sec-label">// 04 — Contact</p>
+    <h2>Open to roles.</h2>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:2rem;max-width:480px;line-height:1.8;">Seeking a full-time gameplay programmer position on PC/console projects. Available for junior, mid, or project-based roles. Based in Gdańsk — open to remote.</p>
+    <div class="contact-grid">
+      <a href="mailto:jaroslaw.gdowski.st@gmail.com" class="contact-card">
+        <div class="contact-icon">@</div>
+        <div><div class="contact-label">Email</div><div class="contact-value">jaroslaw.gdowski.st@gmail.com</div></div>
+      </a>
+      <a href="https://linkedin.com/in/jaroslawgdowski" class="contact-card" target="_blank">
+        <div class="contact-icon">in</div>
+        <div><div class="contact-label">LinkedIn</div><div class="contact-value">jaroslawgdowski</div></div>
+      </a>
+    </div>
+  </div>
+
+  <footer>
+    <p>Jarosław Gdowski — Gameplay Programmer</p>
+    <p>Gdańsk, Poland</p>
+  </footer>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     PROJECT DETAIL VIEW
+═══════════════════════════════════════════ -->
+<div id="project-view">
+
+  <!-- ── NARRATIVE PROJECT ── -->
+  <div id="pv-narrative" style="display:none;">
+    <button class="pv-back" onclick="showMain()">Back to portfolio</button>
+    <div class="pv-hero">
+      <div class="pv-engine">Unreal Engine 5 — Blueprints · In Development</div>
+      <div class="pv-title">Thaelia</div>
+      <p class="pv-tagline">Third-person narrative exploration on a remote island. 10 distinct NPCs living on a schedule, a world that changes with the time of day, and a dialogue system to talk to all of them. Built entirely in Blueprints on top of GASP 5.7.</p>
+      <div class="pv-meta">
+        <div class="pv-meta-item"><div class="pv-meta-label">Engine</div><div class="pv-meta-value">Unreal Engine 5.7</div></div>
+        <div class="pv-meta-item"><div class="pv-meta-label">Scripting</div><div class="pv-meta-value">Blueprints only</div></div>
+        <div class="pv-meta-item"><div class="pv-meta-label">Framework</div><div class="pv-meta-value">GASP 5.7 / Mover</div></div>
+        <div class="pv-meta-item"><div class="pv-meta-label">Version Control</div><div class="pv-meta-value">Perforce</div></div>
+      </div>
+    </div>
+
+    <div class="pv-body">
+
+      <!-- MEDIA -->
+      <div class="media-section">
+        <div class="media-section-title">// Footage & screenshots</div>
+        <div class="media-grid">
+          <div class="media-item full-width" id="thaelia-hero">
+            <img src="media/thaelia/dialogue.webp" alt="Dialogue system">
+            <div class="media-caption">Dialogue system</div>
+          </div>
+          <div class="media-item media-thumb" onclick="swapNarrativeMedia(this)">
+            <img src="media/thaelia/climbing.gif" alt="Climbing system">
+            <div class="media-caption">Climbing system</div>
+          </div>
+          <div class="media-item media-thumb" onclick="swapNarrativeMedia(this)">
+            <img src="media/thaelia/AI_patrol.gif" alt="NPC patrol & scheduling">
+            <div class="media-caption">NPC patrol & scheduling</div>
+          </div>
+          <div class="media-item media-thumb" onclick="swapNarrativeMedia(this)">
+            <img src="media/thaelia/day-night-cycle.gif" alt="Day / night cycle">
+            <div class="media-caption">Day / night cycle</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SYSTEMS -->
+      <div class="systems-section">
+        <div class="systems-section-title">Systems breakdown</div>
+
+        <div class="system-block">
+          <div class="system-block-header"><div class="system-block-dot"></div><div class="system-block-name">Custom Climbing Movement Mode</div></div>
+          <div class="system-block-desc">First task when starting with GASP 5.7 and Mover was understanding how the framework manages movement modes — then extending it cleanly. The climbing system adds a new mode alongside the defaults without forking the framework code.</div>
+          <div class="system-block-details">
+            <div class="detail-row">Studied GASP 5.7 and Mover architecture to understand how to register a new movement mode without touching framework Blueprints</div>
+            <div class="detail-row">Line traces detect climbable surfaces by collision channel — surfaces opt in, no hardcoded logic</div>
+            <div class="detail-row">State transitions: approach → grab → climb → dismount — each state owns its movement and animation logic</div>
+            <div class="detail-row">Animation Blueprint integration with motion matching for smooth blends in and out of climbing</div>
+          </div>
+          <div class="bp-shot">
+            <div class="bp-shot-header"><span class="bp-shot-label">BP_ClimbingMode — angle calculations</span><span class="bp-shot-tag">Blueprint</span></div>
+            <div class="bp-shot-body" style="cursor:default;">
+              <img src="media/thaelia/BP_climbing.jpeg" alt="Climbing mode Blueprint" class="loaded">
+            </div>
+          </div>
+        </div>
+
+        <div class="system-block">
+          <div class="system-block-header"><div class="system-block-dot"></div><div class="system-block-name">Interaction & Inventory System</div></div>
+          <div class="system-block-desc">A Blueprint interface-driven interaction system. Any actor becomes interactable by implementing a single interface — no base class, no coupling. Detection is overlap-based: a capsule component on the player fires when an interactable enters range.</div>
+          <div class="system-block-details">
+            <div class="detail-row">Capsule overlap on the player triggers entry — no per-tick traces, event-driven</div>
+            <div class="detail-row">Overlapping actor checked for the Interactable interface — if it implements Interact, it's eligible</div>
+            <div class="detail-row">Interface requires only one function: Interact — each actor decides what that means for itself</div>
+            <div class="detail-row">Inventory component on player and NPCs stores picked-up items as a data array</div>
+            <div class="detail-row">Pickups, NPCs, and any other actor all go through the same pipeline — zero duplication</div>
+          </div>
+          <div class="bp-shot">
+            <div class="bp-shot-header"><span class="bp-shot-label">BP_InteractionComponent — capsule overlap & interface call</span><span class="bp-shot-tag">Blueprint</span></div>
+            <div class="bp-shot-body" style="cursor:default;">
+              <img src="media/thaelia/BP_Interaction.jpeg" alt="Interaction system Blueprint" class="loaded">
+            </div>
+          </div>
+        </div>
+
+        <div class="system-block">
+          <div class="system-block-header"><div class="system-block-dot"></div><div class="system-block-name">Day/Night Cycle + NPC Scheduling</div></div>
+          <div class="system-block-desc">A time manager Blueprint drives the day/night cycle and fires a dispatcher every in-game hour. NPCs subscribe to this dispatcher and check their schedule data to decide whether to move to a new location or switch tasks.</div>
+          <div class="system-block-details">
+            <div class="detail-row">Day/Night Manager: configurable day length, broadcasts an hourly event dispatcher</div>
+            <div class="detail-row">NPC Schedule: data table per NPC mapping hours to behaviour states (Idle, Work, Eat, Sleep, Patrol)</div>
+            <div class="detail-row">On hour tick: NPC reads its schedule, moves to the designated location, transitions behaviour state</div>
+            <div class="detail-row">10 distinct NPCs each with their own schedule — designers edit data tables, no Blueprint changes needed</div>
+            <div class="detail-row">Sky and lighting actors driven by the same time manager via curves — visual and simulation stay in sync</div>
+          </div>
+          <div class="bp-shot">
+            <div class="bp-shot-header"><span class="bp-shot-label">ST_NPC_AI — State Tree</span><span class="bp-shot-tag">State Tree</span></div>
+            <div class="bp-shot-body" style="cursor:default;">
+              <img src="media/thaelia/ST_AI.jpeg" alt="NPC AI State Tree" class="loaded">
+            </div>
+          </div>
+        </div>
+
+        <div class="system-block">
+          <div class="system-block-header"><div class="system-block-dot"></div><div class="system-block-name">Dialogue System</div></div>
+          <div class="system-block-desc">Built on a base Blueprint Actor Component that owns all the dialogue building blocks — show line, present choices, wait for input. Each NPC gets a child component that overrides exactly one function: Dialogue. That's where the specific conversation is assembled from the parent's primitives.</div>
+          <div class="system-block-details">
+            <div class="detail-row">Base component defines reusable building blocks — show line, show choices, wait for response</div>
+            <div class="detail-row">Each NPC has a child Blueprint component overriding only the Dialogue function — no boilerplate repeated</div>
+            <div class="detail-row">Adding a new NPC dialogue means creating a child and wiring building blocks — parent logic untouched</div>
+            <div class="detail-row">Triggered via the interaction system — talking to an NPC is just another Interact call</div>
+          </div>
+          <div class="bp-shot">
+            <div class="bp-shot-header"><span class="bp-shot-label">BP_DialogueComponent — base class & child override</span><span class="bp-shot-tag">Blueprint</span></div>
+            <div class="bp-shot-body" style="cursor:default;">
+              <img src="media/thaelia/BP_Dialogue.jpeg" alt="Dialogue system Blueprint" class="loaded">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAKEAWAYS -->
+      <div class="takeaways-section">
+        <div class="media-section-title">// What this project demonstrates</div>
+        <div class="takeaways-grid">
+          <div class="takeaway-card"><div class="takeaway-num">01</div><div class="takeaway-text"><strong>Framework literacy</strong> — understood GASP 5.7 and Mover deeply enough to extend them cleanly, without modifying engine or framework code.</div></div>
+          <div class="takeaway-card"><div class="takeaway-num">02</div><div class="takeaway-text"><strong>Architecture instinct</strong> — every system is decoupled. Interaction, scheduling, and dialogue all talk to each other through interfaces and dispatchers, not hard references.</div></div>
+          <div class="takeaway-card"><div class="takeaway-num">03</div><div class="takeaway-text"><strong>Data-driven design</strong> — NPC schedules and dialogue live in data tables. Adding a new NPC or schedule means editing data, not Blueprints.</div></div>
+          <div class="takeaway-card"><div class="takeaway-num">04</div><div class="takeaway-text"><strong>Scope and delivery</strong> — four interconnected systems, 10 NPCs, entirely in Blueprints. Proving production-quality architecture doesn't require C++.</div></div>
+          <div class="takeaway-card"><div class="takeaway-num">05</div><div class="takeaway-text"><strong>Perforce</strong> — set up and configured Perforce for the project team. Learned the depot model, stream setup, workspace config, and how UE integrates with P4V.</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── HORROR PROJECT ── -->
+  <div id="pv-horror" class="pv-secondary" style="display:none;">
+    <button class="pv-back" onclick="showMain()">Back to portfolio</button>
+    <div class="pv-hero" style="--accent: var(--accent2);">
+      <div class="pv-engine" style="color:var(--accent2);">Unreal Engine 5.7 — Blueprints · Prototype</div>
+      <div class="pv-title">Echo</div>
+      <p class="pv-tagline">You only perceive the world through sound. A water drip makes a visible circle. Your footsteps do too. Silence is blindness — and something is moving.</p>
+      <div class="pv-meta">
+        <div class="pv-meta-item"><div class="pv-meta-label">Engine</div><div class="pv-meta-value">Unreal Engine 5.7</div></div>
+        <div class="pv-meta-item"><div class="pv-meta-label">Scripting</div><div class="pv-meta-value">Blueprints only</div></div>
+        <div class="pv-meta-item"><div class="pv-meta-label">Genre</div><div class="pv-meta-value">Horror Survival</div></div>
+        <div class="pv-meta-item"><div class="pv-meta-label">Status</div><div class="pv-meta-value">Prototype</div></div>
+      </div>
+    </div>
+
+    <div class="pv-body">
+      <div class="media-section">
+        <div class="media-section-title" style="--accent:var(--accent2); color:var(--accent2);">// Footage & screenshots</div>
+        <div class="media-grid">
+          <div class="media-item full-width" id="echo-hero">
+            <img src="media/echo/example.gif" alt="Sound ripple system">
+            <div class="media-caption">Sound ripple system</div>
+          </div>
+          <div class="media-placeholder" style="pointer-events:none;">
+            <div class="media-icon">⬜</div>
+            <div class="media-label">Water drip ripple</div>
+            <div class="media-sublabel">Media coming soon</div>
+          </div>
+          <div class="media-placeholder" style="pointer-events:none;">
+            <div class="media-icon">⬜</div>
+            <div class="media-label">Player footsteps</div>
+            <div class="media-sublabel">Media coming soon</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="systems-section">
+        <div class="systems-section-title">Systems breakdown</div>
+        <div class="system-block" style="border-color: rgba(125,212,232,0.15);">
+          <div class="system-block-header"><div class="system-block-dot" style="background:var(--accent2)"></div><div class="system-block-name">Sound Visualisation System</div></div>
+          <div class="system-block-desc">The core of the game. Every audio event — footstep, drip, creak, enemy movement — spawns a world-space visual ring at the source. The ring expands and fades based on the sound's amplitude and frequency characteristics.</div>
+          <div class="system-block-details">
+            <div class="detail-row" style="--accent:var(--accent2)">Audio component hooks via Unreal's Sound Attenuation system — no polling, event-driven</div>
+            <div class="detail-row" style="--accent:var(--accent2)">Each sound event spawns a pooled niagara particle ring at world position</div>
+            <div class="detail-row" style="--accent:var(--accent2)">Ring parameters (radius, speed, opacity curve) driven by sound metadata</div>
+            <div class="detail-row" style="--accent:var(--accent2)">Player footsteps generate rings proportional to movement speed — crouch = smaller, quieter ring</div>
+            <div class="detail-row" style="--accent:var(--accent2)">Enemy sounds vs. ambient sounds visually differentiated by ring colour and pulse pattern</div>
+          </div>
+        </div>
+
+        <div class="system-block" style="border-color: rgba(125,212,232,0.15);">
+          <div class="system-block-header"><div class="system-block-dot" style="background:var(--accent2)"></div><div class="system-block-name">Playability Research</div></div>
+          <div class="system-block-desc">This project started as a question, not a design document: can a game with no traditional visuals be played intuitively? The prototype exists to answer that question under real conditions.</div>
+          <div class="system-block-details">
+            <div class="detail-row" style="--accent:var(--accent2)">Tested spatial awareness — can the player navigate using only ripple feedback?</div>
+            <div class="detail-row" style="--accent:var(--accent2)">Tension mechanics: the player's own sounds can reveal their position to the enemy</div>
+            <div class="detail-row" style="--accent:var(--accent2)">Designed to escalate: early game has many ambient sounds (orientation), late game goes silent</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-section">
+        <div class="media-section-title" style="color:var(--accent2);">// Blueprint excerpts</div>
+        <div class="code-placeholder" style="border-color: rgba(125,212,232,0.2); cursor:default; pointer-events:none;">
+          <span style="color:var(--muted); font-style:italic; text-align:center; line-height:1.8;">Still in development — Blueprint screenshots will be added once the systems are further along.<br><span style="color:rgba(125,212,232,0.5); font-style:normal;">Sound event dispatcher &nbsp;·&nbsp; ring spawner &nbsp;·&nbsp; Niagara parameter binding</span></span>
+        </div>
+      </div>
+
+      <div class="takeaways-section">
+        <div class="media-section-title" style="color:var(--accent2);">// What this project demonstrates</div>
+        <div class="takeaways-grid">
+          <div class="takeaway-card" style="border-color:rgba(125,212,232,0.15)"><div class="takeaway-num" style="color:var(--accent2)">01</div><div class="takeaway-text"><strong>Concept ownership</strong> — original mechanic, self-directed from idea to prototype.</div></div>
+          <div class="takeaway-card" style="border-color:rgba(125,212,232,0.15)"><div class="takeaway-num" style="color:var(--accent2)">02</div><div class="takeaway-text"><strong>Audio systems</strong> — learned Unreal's attenuation and audio routing to build on top of it.</div></div>
+          <div class="takeaway-card" style="border-color:rgba(125,212,232,0.15)"><div class="takeaway-num" style="color:var(--accent2)">03</div><div class="takeaway-text"><strong>Niagara VFX</strong> — parameterised particle system driven by runtime gameplay data.</div></div>
+          <div class="takeaway-card" style="border-color:rgba(125,212,232,0.15)"><div class="takeaway-num" style="color:var(--accent2)">04</div><div class="takeaway-text"><strong>Design thinking</strong> — built to test a hypothesis, not just to look impressive.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── UNITY PROJECT ── -->
+  <div id="pv-unity" class="pv-tertiary" style="display:none;">
+    <button class="pv-back" onclick="showMain()">Back to portfolio</button>
+    <div class="pv-hero">
+      <div class="pv-engine" style="color:var(--accent3);">Unity — C# · Prototype</div>
+      <div class="pv-title">Intrepid<br>Traveller</div>
+      <p class="pv-tagline">A story-driven racing game with horror elements. Atmosphere-first, minimal UI — the narrative woven directly into the gameplay loop. Currently building a presentable vertical slice.</p>
+      <div class="pv-meta">
+        <div class="pv-meta-item"><div class="pv-meta-label">Engine</div><div class="pv-meta-value">Unity</div></div>
+        <div class="pv-meta-item"><div class="pv-meta-label">Language</div><div class="pv-meta-value">C#</div></div>
+        <div class="pv-meta-item"><div class="pv-meta-label">Status</div><div class="pv-meta-value">Active prototype</div></div>
+      </div>
+    </div>
+
+    <div class="pv-body">
+      <div class="media-section">
+        <div class="media-section-title">// Footage & screenshots</div>
+        <div class="media-grid">
+          <div class="media-item full-width" id="unity-hero">
+            <img src="media/stencil.gif" alt="Stencil shader — car headlights">
+            <div class="media-caption">Stencil shader — car headlights</div>
+          </div>
+          <div class="media-item media-thumb" onclick="swapUnityMedia(this)">
+            <img src="media/breakable.gif" alt="Breakable objects & proximity">
+            <div class="media-caption">Breakable objects & proximity</div>
+          </div>
+          <div class="media-item media-thumb" onclick="swapUnityMedia(this)">
+            <img src="media/camera.gif" alt="Camera system">
+            <div class="media-caption">Camera system</div>
+          </div>
+          <div class="media-item media-thumb" onclick="swapUnityMedia(this)">
+            <img src="media/dialogue.gif" alt="Dialogue system">
+            <div class="media-caption">Dialogue system</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="systems-section">
+        <div class="systems-section-title">Systems breakdown</div>
+
+        <div class="system-block">
+          <div class="system-block-header"><div class="system-block-dot"></div><div class="system-block-name">Raycast Car Controller</div></div>
+          <div class="system-block-desc">Built entirely from scratch using a raycast suspension system. No physics wheel colliders — full control over every aspect of the feel. Surface behaviour is data-driven via ScriptableObjects; no code change needed to add a new road type.</div>
+          <div class="system-block-details">
+            <div class="detail-row">Raycast suspension — Hooke's law spring + damping per wheel, force applied at contact point</div>
+            <div class="detail-row">Grip circle — lateral and longitudinal forces treated as a 2D vector; combined magnitude capped by normal force × grip coefficient</div>
+            <div class="detail-row">Weight transfer — derived from CoG height, wheelbase, and trackwidth; longitudinal + lateral components smoothed toward target each FixedUpdate</div>
+            <div class="detail-row">Automatic gears — RPM-based shift-up/shift-down with hysteresis band to prevent gear hunting</div>
+            <div class="detail-row">SurfaceType ScriptableObjects — grip curve, rolling resistance, brake/accel multipliers, suspension damping, particle effects, all tunable per surface asset</div>
+            <div class="detail-row">Per-wheel particles — spawn/swap/stop drift particles when surface changes mid-slide; lifetime-aware cleanup</div>
+            <div class="detail-row">DOTween parking sequence — cinematic slow-down → rotation → reverse-into-spot animation, triggered by selection event</div>
+          </div>
+          <div class="code-block" style="margin-top:1rem;">
+            <div class="code-header"><span class="code-filename">rayCastCar.cs — weight transfer</span><span class="code-lang">C#</span></div>
+            <div class="code-body"><pre><span class="tok-comment">// Weight transfer = (acceleration × CoG height × mass) / axle distance</span>
+<span class="tok-comment">// Derived from vehicle dynamics first principles — not a lerp approximation.</span>
+<span class="tok-comment">// Result feeds into each wheel's normalForce, which drives the grip circle.</span>
+<span class="tok-kw">private void</span> <span class="tok-fn">CalculateLoadTransfer</span>()
+{
+    <span class="tok-type">Vector3</span> localAccel = transform.<span class="tok-fn">InverseTransformDirection</span>(
+        (carRigidbody.linearVelocity - previousVelocity) / Time.fixedDeltaTime);
+
+    <span class="tok-kw">float</span> totalMass = carRigidbody.mass;
+
+    <span class="tok-kw">float</span> longitudinal = <span class="tok-type">Mathf</span>.<span class="tok-fn">Clamp</span>(
+        (localAccel.z * centerOfGravityHeight * totalMass) / wheelbase,
+        -totalMass * maxLoadTransferAmount, totalMass * maxLoadTransferAmount);
+
+    <span class="tok-kw">float</span> lateral = <span class="tok-type">Mathf</span>.<span class="tok-fn">Clamp</span>(
+        (localAccel.x * centerOfGravityHeight * totalMass) / trackWidth,
+        -totalMass * maxLoadTransferAmount, totalMass * maxLoadTransferAmount);
+
+    <span class="tok-kw">float</span> front = totalMass * frontToRearWeightRatio       - longitudinal;
+    <span class="tok-kw">float</span> rear  = totalMass * (1f - frontToRearWeightRatio) + longitudinal;
+
+    targetWheelLoads[0] = rear  / 2f - lateral; <span class="tok-comment">// Rear Left</span>
+    targetWheelLoads[1] = front / 2f - lateral; <span class="tok-comment">// Front Left</span>
+    targetWheelLoads[2] = rear  / 2f + lateral; <span class="tok-comment">// Rear Right</span>
+    targetWheelLoads[3] = front / 2f + lateral; <span class="tok-comment">// Front Right</span>
+
+    <span class="tok-comment">// Smooth toward target — prevents instantaneous weight snap</span>
+    <span class="tok-kw">for</span> (<span class="tok-kw">int</span> i = 0; i &lt; 4; i++)
+    {
+        currentWheelLoads[i] = <span class="tok-type">Mathf</span>.<span class="tok-fn">MoveTowards</span>(currentWheelLoads[i], targetWheelLoads[i],
+            transferRate * totalMass * Time.fixedDeltaTime);
+        currentWheelLoads[i] = <span class="tok-type">Mathf</span>.<span class="tok-fn">Clamp</span>(currentWheelLoads[i],
+            totalMass * 0.05f, totalMass * 0.8f);
+        wheels[i].dynamicWeight = currentWheelLoads[i];
+    }
+
+    previousVelocity = carRigidbody.linearVelocity;
+}</pre></div>
+          </div>
+          <div class="code-block" style="margin-top:0.5rem;">
+            <div class="code-header"><span class="code-filename">rayCastCar.cs — surface data per wheel</span><span class="code-lang">C#</span></div>
+            <div class="code-body"><pre><span class="tok-comment">// Each wheel raycasts the ground and reads a SurfaceType ScriptableObject from it.</span>
+<span class="tok-comment">// Different surfaces mean different suspension feel, grip, and particles — per wheel,</span>
+<span class="tok-comment">// so the front can be on asphalt while the rear is on gravel.</span>
+<span class="tok-kw">private void</span> <span class="tok-fn">CalculateSuspension</span>(<span class="tok-type">WheelData</span> wheel)
+{
+    <span class="tok-kw">float</span> offset = wheel.suspensionRestDistance - wheel.hit.distance;
+    <span class="tok-kw">float</span> vel    = <span class="tok-type">Vector3</span>.<span class="tok-fn">Dot</span>(wheel.wheelTransform.up,
+                       carRigidbody.<span class="tok-fn">GetPointVelocity</span>(wheel.wheelTransform.position));
+
+    <span class="tok-comment">// suspensionDampingMultiplier from SurfaceType asset (gravel, asphalt, mud…)</span>
+    <span class="tok-kw">float</span> force = (offset * wheel.springStrength)
+                - (vel   * wheel.springDamper * wheel.currentSurface.suspensionDampingMultiplier);
+
+    <span class="tok-comment">// Dynamic weight from load transfer feeds directly into normal force</span>
+    <span class="tok-kw">float</span> weightForce = wheel.dynamicWeight * 9.81f;
+    wheel.normalForce  = <span class="tok-type">Mathf</span>.<span class="tok-fn">Max</span>(0, force + weightForce);
+
+    carRigidbody.<span class="tok-fn">AddForceAtPosition</span>(
+        wheel.wheelTransform.up * (force + weightForce),
+        wheel.wheelTransform.position);
+}</pre></div>
+          </div>
+        </div>
+
+        <div class="system-block">
+          <div class="system-block-header"><div class="system-block-dot"></div><div class="system-block-name">Proximity & Interaction Scripts</div></div>
+          <div class="system-block-desc">Two flavours of proximity detection for different scenarios, plus a one-shot breakable object system, all feeding into the same event pipeline.</div>
+          <div class="system-block-details">
+            <div class="detail-row">ProximityManager singleton — batches all distance checks at a configurable interval (default 0.1 s) rather than per-frame per-object</div>
+            <div class="detail-row">ProximityObject — self-registers/deregisters; fires UnityEvent on enter/exit range, gizmo visualisation in editor</div>
+            <div class="detail-row">TriggerProximityDetector — collider-based alternative; optional action-button mode fires event only when player presses Interact inside the zone</div>
+            <div class="detail-row">Breakable objects — trigger-spawns pre-fractured prefab at same position/rotation; FragmentManager handles timed cleanup as a separate component</div>
+          </div>
+        </div>
+
+        <div class="system-block">
+          <div class="system-block-header"><div class="system-block-dot"></div><div class="system-block-name">Camera System</div></div>
+          <div class="system-block-desc">Two layers: an orbital controller for driving, and a manager that switches Cinemachine cameras in response to game events. Camera choice is driven by convention — camera name must match the Ink knot or selection name.</div>
+          <div class="system-block-details">
+            <div class="detail-row">Smooth 360° orbit — right-stick input mapped to atan2 angle, MoveTowardsAngle interpolation; instant snap to 180° on look-behind</div>
+            <div class="detail-row">Speed-reactive FOV + orbital radius — both lerp from base to max as normalised speed rises</div>
+            <div class="detail-row">Perlin noise camera shake — activates above configurable speed threshold; XYZ offset sampled from independent noise timers</div>
+            <div class="detail-row">URP post-processing chain — motion blur, film grain, lens distortion, bloom, DoF; each toggleable and independently smoothed toward speed-derived target</div>
+            <div class="detail-row">CameraManager — subscribes to dialogue and selection events; looks up matching Cinemachine camera by name and bumps its priority to cut to it</div>
+          </div>
+          <div class="code-block" style="margin-top:1rem;">
+            <div class="code-header"><span class="code-filename">cameraEffects.cs — speed-reactive camera</span><span class="code-lang">C#</span></div>
+            <div class="code-body"><pre><span class="tok-comment">// All effects share one normalised speed value t (0 = stopped, 1 = max speed).</span>
+<span class="tok-comment">// FOV, orbital radius, tilt, shake, and post-processing all read from it —</span>
+<span class="tok-comment">// tunable independently, but guaranteed to stay in sync.</span>
+<span class="tok-kw">void</span> <span class="tok-fn">LateUpdate</span>()
+{
+    <span class="tok-kw">float</span> t = <span class="tok-type">Mathf</span>.<span class="tok-fn">Clamp01</span>(targetRigidbody.linearVelocity.magnitude * 3.6f / maxSpeedKmh);
+
+    cam.Lens.FieldOfView = <span class="tok-type">Mathf</span>.<span class="tok-fn">Lerp</span>(cam.Lens.FieldOfView, <span class="tok-type">Mathf</span>.<span class="tok-fn">Lerp</span>(baseFOV,    maxFOV,    t), Time.deltaTime * fovSmooth);
+    orbital.Radius       = <span class="tok-type">Mathf</span>.<span class="tok-fn">Lerp</span>(orbital.Radius,       <span class="tok-type">Mathf</span>.<span class="tok-fn">Lerp</span>(baseRadius, maxRadius, t), Time.deltaTime * radiusSmooth);
+    cam.Lens.Dutch       = <span class="tok-type">Mathf</span>.<span class="tok-fn">Lerp</span>(cam.Lens.Dutch,       maxTilt * t,                          Time.deltaTime * tiltSmooth);
+
+    <span class="tok-comment">// Perlin noise shake — kicks in above threshold, scales with excess speed</span>
+    <span class="tok-kw">if</span> (enableShake &amp;&amp; t &gt; shakeSpeedThreshold)
+    {
+        <span class="tok-kw">float</span> shakeT = (t - shakeSpeedThreshold) / (1f - shakeSpeedThreshold);
+        shakeTimer  += Time.deltaTime * shakeFrequency;
+
+        orbital.TargetOffset = baseTargetOffset + <span class="tok-kw">new</span> <span class="tok-type">Vector3</span>(
+            <span class="tok-type">Mathf</span>.<span class="tok-fn">PerlinNoise</span>(shakeTimer, 0f)         - 0.5f,
+            <span class="tok-type">Mathf</span>.<span class="tok-fn">PerlinNoise</span>(0f, shakeTimer)         - 0.5f,
+            <span class="tok-type">Mathf</span>.<span class="tok-fn">PerlinNoise</span>(shakeTimer, shakeTimer) - 0.5f
+        ) * shakeIntensity * shakeT;
+    }
+    <span class="tok-kw">else</span> { orbital.TargetOffset = baseTargetOffset; }
+
+    <span class="tok-comment">// Post-processing: motion blur, film grain, lens distortion, bloom, DoF —</span>
+    <span class="tok-comment">// all driven by the same t, each with its own smooth speed and intensity range.</span>
+    <span class="tok-kw">if</span> (enableMotionBlur &amp;&amp; motionBlur != <span class="tok-kw">null</span>)
+        motionBlur.intensity.value = <span class="tok-type">Mathf</span>.<span class="tok-fn">Lerp</span>(motionBlur.intensity.value,
+            <span class="tok-type">Mathf</span>.<span class="tok-fn">Lerp</span>(baseMotionBlurIntensity, maxMotionBlurIntensity, t),
+            Time.deltaTime * motionBlurSmooth);
+}</pre></div>
+          </div>
+        </div>
+
+        <div class="system-block">
+          <div class="system-block-header"><div class="system-block-dot"></div><div class="system-block-name">Stencil Buffer Shader</div></div>
+          <div class="system-block-desc">Objects are only visible inside the car's headlight cones. The headlight cone mesh renders first — invisibly — writing a stencil ID to every pixel it covers. All world objects read that stencil and skip drawing where the ID doesn't match.</div>
+          <div class="system-block-details">
+            <div class="detail-row">Queue Geometry-1 — cone mesh renders before everything else in the frame</div>
+            <div class="detail-row">Blend Zero One + ZWrite Off — draws nothing visually; acts as a pure GPU mask</div>
+            <div class="detail-row">Stencil Pass Replace — stamps the ID wherever the cone covers, regardless of what was there</div>
+            <div class="detail-row">World objects use Stencil Comp Equal — only draw where the ID matches; invisible everywhere else</div>
+          </div>
+          <div class="code-block" style="margin-top:1rem;">
+            <div class="code-header"><span class="code-filename">stencilBuffer.shader — headlight mask</span><span class="code-lang">HLSL</span></div>
+            <div class="code-body"><pre><span class="tok-comment">// Applied to the headlight cone mesh. Renders nothing visible —</span>
+<span class="tok-comment">// only writes a stencil ID to every pixel the cone covers.</span>
+<span class="tok-comment">// World objects with Stencil { Comp Equal } skip drawing outside it.</span>
+<span class="tok-type">Shader</span> <span class="tok-str">"Custom/StencilMask"</span>
+{
+    <span class="tok-type">Properties</span>
+    {
+        [IntRange] _StencilID (<span class="tok-str">"Stencil ID"</span>, Range(0, 255)) = 0
+    }
+    <span class="tok-type">SubShader</span>
+    {
+        <span class="tok-type">Tags</span> { <span class="tok-str">"Queue"</span>=<span class="tok-str">"Geometry-1"</span> } <span class="tok-comment">// render before everything else</span>
+
+        <span class="tok-type">Pass</span>
+        {
+            Blend Zero One  <span class="tok-comment">// discard own colour — purely a mask</span>
+            ZWrite Off
+
+            <span class="tok-type">Stencil</span>
+            {
+                Ref [_StencilID]
+                Comp Always
+                Pass Replace   <span class="tok-comment">// stamp ID wherever the cone mesh covers</span>
+            }
+        }
+    }
+}</pre></div>
+          </div>
+        </div>
+
+        <div class="system-block">
+          <div class="system-block-header"><div class="system-block-dot"></div><div class="system-block-name">Ink Dialogue System</div></div>
+          <div class="system-block-desc">Narrative integration using the Ink scripting language. Story content lives in .ink files, fully editable without touching C#. Variable state persists across dialogue sessions — the story remembers what happened.</div>
+          <div class="system-block-details">
+            <div class="detail-row">InkDialogueVariables — snapshots all Ink global variables at startup; re-syncs them back into the story each time dialogue opens, so state survives between knots</div>
+            <div class="detail-row">ChoosePathString — dialogue jumps directly to the named knot, so any object can trigger any story branch</div>
+            <div class="detail-row">Dialogue initiator component — configure knot name + character/card sprites in inspector; one method call to start or end dialogue</div>
+            <div class="detail-row">UI fully decoupled — DialogueManager fires events; DialoguePanelUI and ChoiceButtons only listen, no upward references</div>
+          </div>
+          <div class="code-block" style="margin-top:1rem;">
+            <div class="code-header"><span class="code-filename">InkDialogueVariables.cs — persistent story state</span><span class="code-lang">C#</span></div>
+            <div class="code-body"><pre><span class="tok-comment">// Ink's Story resets on each run. This class captures all global variables</span>
+<span class="tok-comment">// at startup and syncs them back in at the start of every session,</span>
+<span class="tok-comment">// so the story remembers what happened in previous conversations.</span>
+<span class="tok-kw">public class</span> <span class="tok-type">InkDialogueVariables</span>
+{
+    <span class="tok-kw">private</span> <span class="tok-type">Dictionary</span>&lt;<span class="tok-kw">string</span>, Ink.Runtime.<span class="tok-type">Object</span>&gt; variables;
+
+    <span class="tok-kw">public</span> <span class="tok-fn">InkDialogueVariables</span>(<span class="tok-type">Story</span> story)
+    {
+        variables = <span class="tok-kw">new</span> <span class="tok-type">Dictionary</span>&lt;<span class="tok-kw">string</span>, Ink.Runtime.<span class="tok-type">Object</span>&gt;();
+        <span class="tok-kw">foreach</span> (<span class="tok-kw">string</span> name <span class="tok-kw">in</span> story.variablesState)
+            variables.Add(name, story.variablesState.<span class="tok-fn">GetVariableWithName</span>(name));
+    }
+
+    <span class="tok-kw">public void</span> <span class="tok-fn">SyncVariablesAndStartListening</span>(<span class="tok-type">Story</span> story)
+    {
+        <span class="tok-fn">SyncVariablesToStory</span>(story);
+        story.variablesState.variableChangedEvent += <span class="tok-fn">UpdateVariableState</span>;
+    }
+
+    <span class="tok-kw">public void</span> <span class="tok-fn">StopListening</span>(<span class="tok-type">Story</span> story) =&gt;
+        story.variablesState.variableChangedEvent -= <span class="tok-fn">UpdateVariableState</span>;
+
+    <span class="tok-kw">public void</span> <span class="tok-fn">UpdateVariableState</span>(<span class="tok-kw">string</span> name, Ink.Runtime.<span class="tok-type">Object</span> value)
+    {
+        <span class="tok-kw">if</span> (variables.<span class="tok-fn">ContainsKey</span>(name)) variables[name] = value;
+    }
+
+    <span class="tok-kw">private void</span> <span class="tok-fn">SyncVariablesToStory</span>(<span class="tok-type">Story</span> story)
+    {
+        <span class="tok-kw">foreach</span> (<span class="tok-type">KeyValuePair</span>&lt;<span class="tok-kw">string</span>, Ink.Runtime.<span class="tok-type">Object</span>&gt; variable <span class="tok-kw">in</span> variables)
+            story.variablesState.<span class="tok-fn">SetGlobal</span>(variable.Key, variable.Value);
+    }
+}</pre></div>
+          </div>
+        </div>
+
+        <div class="system-block">
+          <div class="system-block-header"><div class="system-block-dot"></div><div class="system-block-name">Event Bus & Input State Machine</div></div>
+          <div class="system-block-desc">All systems communicate through a central event bus rather than direct references. An input state machine ensures only one action map is active at a time — no conflicting inputs between driving, dialogue, and selection modes.</div>
+          <div class="system-block-details">
+            <div class="detail-row">gameEventsManager singleton — holds typed event channel objects (DialogueEvents, InputEvents, SelectionEvents); all wiring uses C# events, not Unity message passing</div>
+            <div class="detail-row">Zero coupling — CarController subscribes to InputEvents; CameraManager subscribes to DialogueEvents and SelectionEvents; neither knows the other exists</div>
+            <div class="detail-row">InputStateManager — on state change, explicitly enables one action map (Car / Dialogue / Selection) and disables the others</div>
+            <div class="detail-row">State broadcast — any system can trigger a state change; all listeners react independently, including the car controller stopping physics and the camera switching</div>
+          </div>
+          <div class="code-block" style="margin-top:1rem;">
+            <div class="code-header"><span class="code-filename">gameEventsManager.cs — event bus</span><span class="code-lang">C#</span></div>
+            <div class="code-body"><pre><span class="tok-comment">// Single scene-wide singleton that owns all typed event channels.</span>
+<span class="tok-comment">// Systems subscribe to whichever channels they care about —</span>
+<span class="tok-comment">// no direct references between them, no FindObjectOfType calls.</span>
+<span class="tok-kw">public class</span> <span class="tok-type">gameEventsManager</span> : <span class="tok-type">MonoBehaviour</span>
+{
+    <span class="tok-kw">public static</span> <span class="tok-type">gameEventsManager</span> instance { <span class="tok-kw">get</span>; <span class="tok-kw">private set</span>; }
+
+    <span class="tok-kw">public</span> <span class="tok-type">DialogueEvents</span>  dialogueEvents;
+    <span class="tok-kw">public</span> <span class="tok-type">InputEvents</span>     inputEvents;
+    <span class="tok-kw">public</span> <span class="tok-type">SelectionEvents</span> selectionEvents;
+    <span class="tok-kw">public</span> <span class="tok-type">CarInputAction</span>  inputActions;
+
+    <span class="tok-kw">private void</span> <span class="tok-fn">Awake</span>()
+    {
+        <span class="tok-kw">if</span> (instance != <span class="tok-kw">null</span>) { <span class="tok-type">Debug</span>.<span class="tok-fn">LogError</span>(<span class="tok-str">"Duplicate GameEventsManager!"</span>); <span class="tok-kw">return</span>; }
+        instance        = <span class="tok-kw">this</span>;
+        inputActions    = <span class="tok-kw">new</span> <span class="tok-type">CarInputAction</span>();
+        dialogueEvents  = <span class="tok-kw">new</span> <span class="tok-type">DialogueEvents</span>();
+        inputEvents     = <span class="tok-kw">new</span> <span class="tok-type">InputEvents</span>();
+        selectionEvents = <span class="tok-kw">new</span> <span class="tok-type">SelectionEvents</span>();
+    }
+}</pre></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="takeaways-section">
+        <div class="media-section-title">// What this project demonstrates</div>
+        <div class="takeaways-grid">
+          <div class="takeaway-card"><div class="takeaway-num">01</div><div class="takeaway-text"><strong>Vehicle physics from first principles</strong> — grip circle, weight transfer, and Hooke's law suspension implemented correctly, not approximated.</div></div>
+          <div class="takeaway-card"><div class="takeaway-num">02</div><div class="takeaway-text"><strong>Data-driven design</strong> — SurfaceType ScriptableObjects decouple physics tuning from code; new road types require zero C# changes.</div></div>
+          <div class="takeaway-card"><div class="takeaway-num">03</div><div class="takeaway-text"><strong>Decoupled architecture</strong> — event bus means systems never reference each other directly; adding or removing a feature doesn't break others.</div></div>
+          <div class="takeaway-card"><div class="takeaway-num">04</div><div class="takeaway-text"><strong>Narrative engineering</strong> — Ink variable persistence and knot-based camera switching show the story is a first-class system, not an afterthought.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end project-view -->
+
+
+<script>
+function swapNarrativeMedia(thumb) {
+  const hero = document.getElementById('thaelia-hero');
+  const heroImg = hero.querySelector('img');
+  const heroCap = hero.querySelector('.media-caption');
+  const thumbImg = thumb.querySelector('img');
+  const thumbCap = thumb.querySelector('.media-caption');
+
+  heroImg.style.opacity = '0';
+  setTimeout(() => {
+    [heroImg.src, thumbImg.src] = [thumbImg.src, heroImg.src];
+    [heroImg.alt, thumbImg.alt] = [thumbImg.alt, heroImg.alt];
+    [heroCap.textContent, thumbCap.textContent] = [thumbCap.textContent, heroCap.textContent];
+    heroImg.style.opacity = '1';
+  }, 120);
+}
+
+function swapUnityMedia(thumb) {
+  const hero = document.getElementById('unity-hero');
+  const heroImg = hero.querySelector('img');
+  const heroCap = hero.querySelector('.media-caption');
+  const thumbImg = thumb.querySelector('img');
+  const thumbCap = thumb.querySelector('.media-caption');
+
+  heroImg.style.opacity = '0';
+  setTimeout(() => {
+    [heroImg.src, thumbImg.src] = [thumbImg.src, heroImg.src];
+    [heroImg.alt, thumbImg.alt] = [thumbImg.alt, heroImg.alt];
+    [heroCap.textContent, thumbCap.textContent] = [thumbCap.textContent, heroCap.textContent];
+    heroImg.style.opacity = '1';
+  }, 120);
+}
+
+function showProject(id) {
+  document.getElementById('main-view').style.display = 'none';
+  document.getElementById('project-view').style.display = 'block';
+  ['narrative','horror','unity'].forEach(p => {
+    document.getElementById('pv-'+p).style.display = (p===id) ? 'block' : 'none';
+  });
+  window.scrollTo({top: 0, behavior: 'instant'});
+}
+
+function showMain() {
+  document.getElementById('project-view').style.display = 'none';
+  document.getElementById('main-view').style.display = 'block';
+  window.scrollTo({top: 0, behavior: 'instant'});
+}
+
+function triggerUpload(id) {
+  document.getElementById('upload-'+id).click();
+}
+
+function handleMediaUpload(input, displayId) {
+  const file = input.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  const container = document.getElementById(displayId);
+  const placeholder = input.closest('.media-placeholder');
+
+  placeholder.querySelectorAll('.media-icon,.media-label,.media-sublabel,.media-upload-hint').forEach(el => el.style.display = 'none');
+
+  if (file.type.startsWith('video')) {
+    const vid = document.createElement('video');
+    vid.src = url; vid.autoplay = true; vid.loop = true; vid.muted = true; vid.playsInline = true;
+    vid.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:4px;';
+    container.appendChild(vid);
+  } else {
+    const img = document.createElement('img');
+    img.src = url;
+    img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:4px;';
+    container.appendChild(img);
+  }
+}
+
+function handleBpShot(input, imgId) {
+  const file = input.files[0];
+  if (!file) return;
+  const img = document.getElementById(imgId);
+  img.src = URL.createObjectURL(file);
+  img.classList.add('loaded');
+  const body = input.closest('.bp-shot-body');
+  body.querySelectorAll('.bp-shot-icon,.bp-shot-hint').forEach(el => el.style.display = 'none');
+  body.classList.add('has-image');
+  body.addEventListener('click', () => openLightbox(img.src, img.alt));
+}
+
+function openLightbox(src, alt) {
+  const lb = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lightbox-img');
+  lbImg.src = src;
+  lbImg.alt = alt;
+  lb.classList.add('open');
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+// Wire up static bp-shot images for lightbox on load
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.bp-shot-body img.loaded').forEach(img => {
+    img.closest('.bp-shot-body').classList.add('has-image');
+    img.closest('.bp-shot-body').addEventListener('click', () => openLightbox(img.src, img.alt));
+  });
+});
+
+// Scroll fade-in
+const obs = new IntersectionObserver(entries => entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }), {threshold:0.08});
+document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+</script>
+<div id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="">
+</div>
+</body>
+</html>
