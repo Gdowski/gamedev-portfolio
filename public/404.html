@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+  var path = location.pathname.replace('/gamedev-portfolio', '') || '/';
+  location.replace('/gamedev-portfolio/?r=' + encodeURIComponent(path));
+</script>
+</head>
+</html>
