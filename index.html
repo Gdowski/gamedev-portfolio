@@ -1157,12 +1157,17 @@ window.addEventListener('popstate', e => {
   else showMain(false);
 });
 
-// Handle direct navigation to a project URL on load
+// Handle direct navigation / GitHub Pages 404 redirect
 (function() {
+  const params = new URLSearchParams(location.search);
+  const redirected = params.get('r');
+  if (redirected) {
+    const clean = '/gamedev-portfolio' + redirected;
+    history.replaceState(null, '', clean);
+  }
   const match = location.pathname.match(/\/project\/(\w+)$/);
   if (match && PROJECTS.includes(match[1])) {
     showProject(match[1], false);
-    history.replaceState({project: match[1]}, '', location.pathname);
   } else {
     history.replaceState({project: null}, '', location.pathname);
   }

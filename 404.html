@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+  // Redirect to index.html, preserving the path as a query param
+  var path = location.pathname.replace('/gamedev-portfolio', '') || '/';
+  location.replace('/gamedev-portfolio/?r=' + encodeURIComponent(path));
+</script>
+</head>
+</html>
